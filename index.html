@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join the Channel</title>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8; --accent:#2aabee; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+         background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding:16px; }
+  .card { width:100%; max-width:420px; background:var(--card); border-radius:16px; padding:32px 24px; text-align:center; }
+  h1 { font-size:1.5rem; margin:0 0 8px; }
+  p { color:var(--muted); line-height:1.5; margin:0 0 24px; }
+  .btn { display:block; background:var(--accent); color:#fff; text-decoration:none; font-weight:600;
+         padding:14px 20px; border-radius:10px; }
+  .btn:active { opacity:.85; }
+  .info { margin-top:20px; font-size:.8rem; color:var(--muted); }
+</style>
+</head>
+<body>
+  <main class="card">
+    <h1>Join Our Private Channel</h1>
+    <p>Get exclusive updates and content. Tap the button below and send a join request.</p>
+
+    <a href="#" class="btn" data-tg-join>Join Telegram Channel</a>
+
+    <div class="info" id="info"></div>
+  </main>
+
+  <!-- Tracking script. Change data-tenant to the slug of your client in the admin panel. -->
+  <script src="https://track.kdexads.online/landing.js" data-tenant="test-client" data-cfasync="false" defer></script>
+
+  <script>
+    // Test helper only: shows whether the page URL carries an fbclid. Safe to delete in production.
+    (function () {
+      var has = /[?&]fbclid=/.test(location.search);
+      document.getElementById('info').textContent =
+        has ? 'Test mode: fbclid detected in the URL.' : 'Test mode: no fbclid in the URL (add ?fbclid=TEST123 to simulate an ad click).';
+    })();
+  </script>
+</body>
+</html>
