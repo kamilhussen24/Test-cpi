@@ -3,41 +3,199 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Join the Channel</title>
+<title>Join Our Private Telegram Channel</title>
+<meta name="description" content="Request access to our private Telegram channel.">
+
+<!--
+  ==========================================================================
+  SAMPLE LANDING PAGE  (v1.0)  -  works with the Telegram CAPI Tracker
+  ==========================================================================
+
+  HOW TO USE THIS FILE FOR A NEW CLIENT
+  -------------------------------------
+  1. In the admin panel, create the client and note its SLUG (for example "acme-fitness").
+  2. Edit the <script> tag near the bottom of this file:
+       - src            -> your tracker domain, e.g. https://track.yourdomain.com/landing.js
+       - data-tenant    -> the client's slug
+       - data-fallback  -> a fixed Telegram link used when tracking is unavailable (see below)
+  3. Edit the FALLBACK link in the join button below (href="...") so it matches data-fallback.
+  4. In the admin panel, open the client and add this page's domain under
+     "Landing page domains" (for example landing.yourdomain.com). Without this the
+     server rejects the request and the visitor is sent to the fallback link.
+  5. Upload this file as index.html (Cloudflare Pages, Netlify, any static host) and
+     use that page URL as the destination of the Facebook ad.
+
+  HOW THE JOIN BUTTON WORKS
+  -------------------------
+  - Any element with the attribute  data-tg-join  becomes a tracked join button.
+  - On click, landing.js asks your server for a unique one-time invite link and sends the
+    visitor to it. The visitor's fbclid, _fbc, _fbp and UTM values are sent along, so the
+    join can later be reported to Meta as a conversion.
+  - Never put a plain t.me invite link on a tracked button without the fallback logic below,
+    or the click cannot be matched to the person who joins.
+  - You can use as many join buttons on the page as you like. Each one just needs data-tg-join.
+
+  THE FALLBACK (what happens when something goes wrong)
+  -----------------------------------------------------
+  Layer 1 - data-fallback on the script tag.
+    If the server is down, answers with an error, the link cannot be created, or nothing
+    happens within 8 seconds, landing.js sends the visitor to the data-fallback link.
+    Without data-fallback the visitor only sees an error message.
+
+  Layer 2 - href on the button.
+    If landing.js cannot even load (server completely unreachable, blocked script), the
+    button is just a normal link, so its href is used. When landing.js loads, it replaces
+    this default behaviour with the tracked flow.
+
+  Use the same fixed Telegram link in both layers. Tracking is lost for those visitors,
+  but nobody is lost from the funnel. Use a link that has "Request admin approval" enabled
+  if you want to review them, or a normal public link.
+
+  OPTIONAL SETTINGS ON THE SCRIPT TAG
+  -----------------------------------
+  data-no-pixel="true"   Do not load the Meta Pixel from this script (use it when the page
+                         already has its own Pixel code, or you only want server-side events).
+  By default the script loads the client's Pixel (set in the admin panel) and fires PageView.
+
+  USEFUL EVENTS (optional, for custom behaviour)
+  ----------------------------------------------
+  The script sets "aria-busy" and the class "tg-loading" on the button while it works, and
+  fires a "tgjoin:error" event on window if there was no fallback to use.
+
+  TIPS
+  ----
+  - Keep the fbclid in the URL: do not redirect the ad click through another page that strips
+    query parameters.
+  - Test with:  https://your-page-url/?fbclid=TEST123
+  - Remove this long comment block before going live if you like; nothing here is required.
+  ==========================================================================
+-->
+
 <style>
-  :root { --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8; --accent:#2aabee; }
-  * { box-sizing:border-box; }
-  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
-         background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding:16px; }
-  .card { width:100%; max-width:420px; background:var(--card); border-radius:16px; padding:32px 24px; text-align:center; }
-  h1 { font-size:1.5rem; margin:0 0 8px; }
-  p { color:var(--muted); line-height:1.5; margin:0 0 24px; }
-  .btn { display:block; background:var(--accent); color:#fff; text-decoration:none; font-weight:600;
-         padding:14px 20px; border-radius:10px; }
-  .btn:active { opacity:.85; }
-  .info { margin-top:20px; font-size:.8rem; color:var(--muted); }
+  :root {
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #5b6b82;
+    --line: #e3e9f2;
+    --accent: #229ed9;
+    --accent-dark: #1b86b9;
+    --ok: #16a34a;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(1200px 500px at 50% -10%, #dff1fb 0%, rgba(223,241,251,0) 70%), var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px;
+  }
+  .card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 32px 24px 24px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .07);
+  }
+  .logo {
+    width: 64px; height: 64px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo svg { width: 32px; height: 32px; fill: #fff; margin-left: -2px; }
+  h1 { font-size: 1.55rem; line-height: 1.25; margin: 0 0 10px; letter-spacing: -.01em; }
+  .lead { color: var(--muted); margin: 0 0 22px; font-size: 1rem; }
+
+  .points { list-style: none; margin: 0 0 26px; padding: 0; text-align: left; }
+  .points li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 1px solid var(--line); font-size: .95rem; }
+  .points li:first-child { border-top: 0; }
+  .points .tick { flex: 0 0 20px; height: 20px; margin-top: 2px; border-radius: 50%; background: #e7f6ec; display: flex; align-items: center; justify-content: center; }
+  .points .tick svg { width: 12px; height: 12px; stroke: var(--ok); fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* The join button. data-tg-join is what makes it a tracked button. */
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700; font-size: 1.05rem;
+    text-decoration: none;
+    padding: 16px 20px;
+    border-radius: 14px;
+    box-shadow: 0 6px 16px rgba(34, 158, 217, .35);
+    transition: background .15s, transform .05s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:hover { background: var(--accent-dark); }
+  .btn:active { transform: translateY(1px); }
+  .btn svg { width: 22px; height: 22px; fill: #fff; }
+  /* landing.js adds these while the invite link is being created */
+  .btn[aria-busy="true"], .btn.tg-loading { opacity: .7; pointer-events: none; }
+
+  .note { margin: 14px 0 0; font-size: .82rem; color: var(--muted); }
+  .foot { margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--line); font-size: .75rem; color: #8a98ad; }
+
+  @media (min-width: 640px) {
+    .card { padding: 40px 36px 28px; }
+    h1 { font-size: 1.8rem; }
+  }
 </style>
 </head>
 <body>
   <main class="card">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M21.9 4.1 2.8 11.5c-.9.4-.9 1.1-.2 1.3l4.9 1.5 1.9 5.7c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.4-2.3 4.9 3.6c.9.5 1.5.2 1.8-.8L23 5.4c.3-1.3-.5-1.9-1.1-1.3zM9 13.9l9.7-6.1c.5-.3.9-.1.5.2l-7.9 7.1-.3 3.4L9 13.9z"/></svg>
+    </div>
+
     <h1>Join Our Private Channel</h1>
-    <p>Get exclusive updates and content. Tap the button below and send a join request.</p>
+    <p class="lead">Get exclusive updates, tips and offers straight to your Telegram. Send a join request in one tap.</p>
 
-    <a href="#" class="btn" data-tg-join>Join Telegram Channel</a>
+    <ul class="points">
+      <li><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><span>Daily updates delivered to your phone</span></li>
+      <li><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><span>Members-only content and announcements</span></li>
+      <li><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><span>Free to join, leave any time</span></li>
+    </ul>
 
-    <div class="info" id="info"></div>
+    <!--
+      JOIN BUTTON
+      - data-tg-join : makes this a tracked button (required).
+      - href         : Layer 2 fallback. Replace with your fixed Telegram link
+                       (it is only used if landing.js cannot load at all).
+    -->
+    <a class="btn" href="https://t.me/your_fallback_channel" data-tg-join>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 4.1 2.8 11.5c-.9.4-.9 1.1-.2 1.3l4.9 1.5 1.9 5.7c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.4-2.3 4.9 3.6c.9.5 1.5.2 1.8-.8L23 5.4c.3-1.3-.5-1.9-1.1-1.3z"/></svg>
+      <span>Join on Telegram</span>
+    </a>
+    <p class="note">You will be taken to Telegram to send your join request.</p>
+
+    <div class="foot">By joining you agree to receive messages from this channel.</div>
   </main>
 
-  <!-- Tracking script. Change data-tenant to the slug of your client in the admin panel. -->
-  <script src="https://track.kdexads.online/landing.js" data-tenant="test-client" data-cfasync="false" defer></script>
-
-  <script>
-    // Test helper only: shows whether the page URL carries an fbclid. Safe to delete in production.
-    (function () {
-      var has = /[?&]fbclid=/.test(location.search);
-      document.getElementById('info').textContent =
-        has ? 'Test mode: fbclid detected in the URL.' : 'Test mode: no fbclid in the URL (add ?fbclid=TEST123 to simulate an ad click).';
-    })();
-  </script>
+  <!--
+    TRACKING SCRIPT  -  edit the three values below for each client.
+      src            : your tracker domain + /landing.js
+      data-tenant    : the client's slug from the admin panel
+      data-fallback  : fixed Telegram link used when the server is down or a link cannot be created
+      data-cfasync   : keep "false" so Cloudflare Rocket Loader never delays or rewrites the script
+      defer          : keep, so the script never blocks the page
+    Optional: add data-no-pixel="true" to skip loading the Meta Pixel from this script.
+  -->
+  <script
+    src="https://track.yourdomain.com/landing.js"
+    data-tenant="your-client-slug"
+    data-fallback="https://t.me/your_fallback_channel"
+    data-cfasync="false"
+    defer></script>
 </body>
 </html>
